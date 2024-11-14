@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Call - WhatsApp Replica</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Audio Call with <span id="friendName"></span></h1>
+    </header>
+
+    <main>
+        <section id="audioCallSection">
+            <div id="callStatus">Connecting...</div>
+            <div id="controls">
+                <button onclick="toggleMute()">Mute</button>
+                <button onclick="endCall()">End Call</button>
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue, push } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+
+        // Firebase configuration (replace with your project details)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYOyIRSUKpEpGwxZfXgpPDxjP-mYouerg",
+            authDomain: "thesocial-cba4b.firebaseapp.com",
+            databaseURL: "https://thesocial-cba4b-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "thesocial-cba4b",
+            storageBucket: "thesocial-cba4b.appspot.com",
+            messagingSenderId: "457960071987",
+            appId: "1:457960071987:web:cf1cb5b332dccf03355446",
+            measurementId: "G-Z1N1WD6HN2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const friendUsername = urlParams.get('friend');
+        const username = 'user1'; // Replace with dynamic retrieval based on login
+
+        document.getElementById('friendName').textContent = friendUsername;
+        const callRef = ref(db, `calls/${username}/${friendUsername}`);
+        const callStatus = document.getElementById('callStatus');
+
+        let localStream;
+        let peerConnection;
+        let isCaller = true;
+
+        async function startAudioCall() {
+            try {
+                // Request only audio from the user's media devices
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+
+                setupPeerConnection();
+
+                if (isCaller) {
+                    initiateOffer();
+                } else {
+                    answerCall();
+                }
+            } catch (error) {
+                console.error('Error accessing audio:', error);
+                alert('Could not access microphone.');
+            }
+        }
+
+        function setupPeerConnection() {
+            const peerConnection = new RTCPeerConnection();
+
+
+// Event to receive and play the remote audio stream
+
+
+            // Add audio track to peer connection
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+            peerConnection.onicecandidate = event => {
+                if (event.candidate) {
+                    push(ref(db, `calls/${username}/${friendUsername}/iceCandidates`), {
+                        sender: username,
+                        candidate: event.candidate.toJSON()
+                    });
+                }
+            };
+
+            // Handle remote audio stream
+            peerConnection.ontrack = event => {
+                const emoteAudio = new Audio();
+                remoteAudio.srcObject = event.streams[0];
+                remoteAudio.play();
+                callStatus.textContent = "Connected";
+            };
+
+            listenForConnectionChanges();
+        }
+
+        function listenForConnectionChanges() {
+            peerConnection.onconnectionstatechange = () => {
+                switch(peerConnection.connectionState) {
+                    case "connected":
+                        callStatus.textContent = "Connected";
+                        break;
+                    case "disconnected":
+                    case "failed":
+                        callStatus.textContent = "Call Failed";
+                        endCall();
+                        break;
+                    case "closed":
+                        callStatus.textContent = "Call Ended";
+                        break;
+                }
+            };
+        }
+
+        async function initiateOffer() {
+            peerConnection.onnegotiationneeded = async () => {
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                set(callRef, { offer: offer, sender: username });
+
+                // Listen for answer
+                onValue(callRef, async snapshot => {
+                    const data = snapshot.val();
+                    if (data && data.answer && data.sender !== username) {
+                        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+                    }
+                });
+            };
+        }
+
+        async function answerCall() {
+            // Listen for offer from the caller
+            onValue(callRef, async snapshot => {
+                const data = snapshot.val();
+                if (data && data.offer && data.sender !== username) {
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+
+                    const answer = await peerConnection.createAnswer();
+                    await peerConnection.setLocalDescription(answer);
+                    set(callRef, { answer: answer, sender: username });
+                }
+            });
+        }
+
+        // Listening for ICE candidates
+        onValue(ref(db, `calls/${friendUsername}/${username}/iceCandidates`), snapshot => {
+            snapshot.forEach(async candidateSnapshot => {
+                const candidate = candidateSnapshot.val();
+                if (candidate && candidate.sender !== username) {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(candidate.candidate));
+                }
+            });
+        });
+
+        function toggleMute() {
+            const audioTracks = localStream.getAudioTracks();
+            audioTracks[0].enabled = !audioTracks[0].enabled;
+        }
+
+        function endCall() {
+            localStream.getTracks().forEach(track => track.stop());
+            if (peerConnection) {
+                peerConnection.close();
+            }
+            callStatus.textContent = "Call Ended";
+            set(callRef, null); // Remove call data from Firebase
+            window.location.href = 'friends.html'; // Redirect to friends list
+        }
+
+        startAudioCall();
+    </script>
+</body>
+</html>

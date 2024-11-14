@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Form</title>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+        .form-control {
+            margin-bottom: 15px;
+        }
+        .form-control label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-control input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .error {
+            color: red;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <form id="userForm">
+        <div class="form-control">
+            <label for="Username">Username:</label>
+            <input type="text" id="Username" required>
+            <div id="nameError" class="error"></div>
+        </div>
+
+        <div class="form-control">
+            <label for="dob">Date of Birth:</label>
+            <input type="date" id="dob" required>
+            <div id="dobError" class="error"></div>
+        </div>
+
+        <div class="form-control">
+            <label for="Name">Name:</label>
+            <input type="text" id="Name" required>
+            <div id="usernameError" class="error"></div>
+        </div>
+
+        <div class="form-control">
+            <label for="phone">Phone Number:</label>
+            <input type="tel" id="phone" required pattern="[0-9]{10}">
+            <div id="phoneError" class="error"></div>
+        </div>
+        <button type="button" onclick="validateForm()">Submit</button>
+    </form>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+        import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYOyIRSUKpEpGwxZfXgpPDxjP-mYouerg",
+            authDomain: "thesocial-cba4b.firebaseapp.com",
+            databaseURL: "https://thesocial-cba4b-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "thesocial-cba4b",
+            storageBucket: "thesocial-cba4b.appspot.com",
+            messagingSenderId: "457960071987",
+            appId: "1:457960071987:web:cf1cb5b332dccf03355446",
+            measurementId: "G-Z1N1WD6HN2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Validate form and check if username exists in Firebase
+        window.validateForm = function () {
+            let valid = true;
+
+            // Name Validation
+            const name = document.getElementById('Name').value;
+            if (name === "") {
+                valid = false;
+                document.getElementById('usernameError').textContent = "Please enter your name.";
+            } else {
+                document.getElementById('usernameError').textContent = "";
+            }
+
+            // DOB Validation
+            const dob = document.getElementById('dob').value;
+            if (dob === "") {
+                valid = false;
+                document.getElementById('dobError').textContent = "Please select your date of birth.";
+            } else {
+                document.getElementById('dobError').textContent = "";
+            }
+
+            // Username Validation
+            const username = document.getElementById('Username').value;
+            if (username === "") {
+                valid = false;
+                document.getElementById('nameError').textContent = "Please enter a username.";
+            } else {
+                document.getElementById('nameError').textContent = "";
+            }
+
+            // Phone Number Validation
+            const phone = document.getElementById('phone').value;
+            const phonePattern = /^[0-9]{10}$/;
+            if (!phonePattern.test(phone)) {
+                valid = false;
+                document.getElementById('phoneError').textContent = "Please enter a valid 10-digit phone number.";
+            } else {
+                document.getElementById('phoneError').textContent = "";
+            }
+
+            if (valid) {
+                checkUsername(username.toLowerCase());  // Convert username to lowercase for case-insensitive check
+            }
+        };
+
+        // Check if the username already exists in Firebase
+        function checkUsername(username) {
+            const dbRef = ref(db);
+            get(child(dbRef, `Users/`)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const users = snapshot.val();
+                    const usernames = Object.keys(users).map(key => key.toLowerCase());  // Convert all usernames to lowercase
+                    if (usernames.includes(username)) {
+                        document.getElementById('nameError').textContent = "Username already exists!";
+                    } else {
+                        Success();  // Proceed with form submission
+                    }
+                } else {
+                    Success();  // No users in the database, proceed with form submission
+                }
+            }).catch((error) => {
+                console.error(error);
+            });
+        }
+
+        // Submit the form data to Firebase
+        window.Success = function () {
+            const name = document.getElementById("Name").value;
+            const userId = document.getElementById("Username").value;
+            const phone = document.getElementById("phone").value;
+            const dob = document.getElementById("dob").value;
+
+            set(ref(db, 'Users/' + userId), {
+                username: name,
+                Phonenumber: phone,
+                DateofBirth: dob
+            });
+            alert("Form submitted successfully!");
+            window.location.href = "Data.html?username="+userId;
+        };
+    </script>
+</body>
+</html>

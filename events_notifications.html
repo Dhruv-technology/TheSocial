@@ -1,0 +1,135 @@
+events_notifications
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social - Events & Notifications</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script defer src="Data.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Events & Notifications</h1>
+        <nav>
+            <ul>
+                <li><a href="data.html"><i class="fas fa-arrow-left"></i> Back</a></li>
+                <li><a href="events_notifications.html"><i class="fas fa-bell"></i> Events & Notifications</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section id="events_notifications" class="page">
+            <h2>Notifications</h2>
+            <div id="notificationList">
+                <ul>
+                    <li>You have a new friend request</li>
+                    <li>Your post got 10 likes</li>
+                </ul>
+            </div>
+            <h2>Public Events</h2>
+            <div id="publicEvents">
+                <p>No public events available.</p>
+            </div>
+            <h2>Create Event</h2>
+            <form id="createEventForm">
+                <label for="eventName">Event Name:</label>
+                <input type="text" id="eventName" name="eventName" required>
+                <label for="eventDate">Event Date:</label>
+                <input type="date" id="eventDate" name="eventDate" required>
+                <button type="submit">Create Event</button>
+            </form>
+            <section id="notifications" class="page">
+                <h2>Notifications Section</h2>
+                <div id="notificationList">
+                    <ul>
+                        <li>You have a new friend request</li>
+                        <li>Your post got 10 likes</li>
+                    </ul>
+                </div>
+            </section>
+            <section id="events" class="page">
+                <h2>Public Events</h2>
+                <div id="publicEvents">
+                    <p>No public events available.</p>
+                </div>
+                <h2>Create Event</h2>
+                function displayNotification(notification) {
+                    console.log('New Notification:', notification);
+                }
+                document.addEventListener('DOMContentLoaded', function () {
+                    const isDarkMode = JSON.parse(localStorage.getItem('darkMode'));
+                    if (isDarkMode) {
+                        document.body.classList.add('dark-mode');
+                    }
+                
+                    document.getElementById('logoutBtn').addEventListener('click', logout);
+                    document.getElementById('fetchButton').addEventListener('click', fetchData);
+                    document.getElementById('performTaskButton').addEventListener('click', performTask);
+                    showPage('home'); // Show the default page on load
+                    document.getElementById('toggleTheme').addEventListener('click', toggleDarkMode);
+                    document.getElementById('createEventForm').addEventListener('submit', createEvent);
+                });function displayNotification(notification) {
+                    console.log('New Notification:', notification);
+                }
+                
+                // Listen for real-time notifications
+                const db = firebase.firestore();
+                db.collection('notifications').onSnapshot(function (snapshot) {
+                    snapshot.docChanges().forEach(function (change) {
+                        if (change.type === 'added') {
+                            displayNotification(change.doc.data());
+                        }
+                    });
+                });
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Show the default page (home) on load
+                    showPage('home');
+                
+                    // Event listener for theme toggle
+                    document.getElementById('toggleTheme').addEventListener('click', toggleDarkMode);
+                
+                    // Event listeners for other functionalities
+                    document.getElementById('createEventForm').addEventListener('submit', createEvent);
+                });
+                
+                // Function to show the selected page and hide others
+                function showPage(pageId) {
+                    const pages = document.querySelectorAll('.page');
+                    pages.forEach(page => {
+                        page.style.display = page.id === pageId ? 'block' : 'none';
+                    });
+                }
+                Event:function createEvent(event) {
+                    event.preventDefault();
+                    const eventName = document.getElementById('eventName').value;
+                    const eventDate = document.getElementById('eventDate').value;
+                
+                    const publicEvents = document.getElementById('publicEvents');
+                    const eventElement = document.createElement('p');
+                    eventElement.textContent = `Event: ${eventName}, Date: ${eventDate}`;
+                    publicEvents.appendChild(eventElement);
+                }
+                function createEvent(event) {
+                    event.preventDefault();
+                    const eventName = document.getElementById('eventName').value;
+                    const eventDate = document.getElementById('eventDate').value;
+                
+                    const publicEvents = document.getElementById('publicEvents');
+                    const eventElement = document.createElement('p');
+                    eventElement.textContent = `Event: ${eventName}, Date: ${eventDate}`;
+                    publicEvents.appendChild(eventElement);
+                }
+                <form id="createEventForm">
+                    <label for="eventName">Event Name:</label>
+                    <input type="text" id="eventName" name="eventName" required>
+                    <label for="eventDate">Event Date:</label>
+                    <input type="date" id="eventDate" name="eventDate" required>
+                    <button type="submit">Create Event</button>
+                </form>
+            </section>
+        </section>
+    </main>
+</body>
+</html>

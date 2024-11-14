@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social(Home)</title>
+    <link rel="stylesheet" href="Style.css" defer>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-storage.js"></script>
+
+</head>
+
+<body onload="OnContentLoaded()">
+ <header>
+    <br><br>
+   <div class="header-container">
+    <button onclick="toggleNavBar()" id="toggleNavbar"><i class="fa-solid fa-bars" ></i></button>
+     <h1>Social Media Super App</h1>
+     <!--Dark mode to be made-->
+     <button id="mode" onclick="darkmode()"><i class="fa-solid fa-moon"></i></button>
+      </div>
+      <br><br>
+    <nav id="navbar">
+      <ul>
+         <li><a href="Data.html"><i class="fas fa-home"></i> Home</a></li>
+         <li><a href="profile.html"><i class="fas fa-user"></i> Settings</a></li>
+         <li><a href="friends.html"><i class="fas fa-users"></i> Friends</a></li>
+         <li><a href="events_notifications.html"><i class="fas fa-bell"></i> Notifications</a></li>
+         <li><a href="events_notifications.html"><i class="fas fa-calendar-alt"></i> Events</a></li>
+         <li><a href="jobs.html"><i class="fas fa-briefcase"></i> Jobs</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+<h2>Feed Section</h2>
+<div id="feed" class="page">
+    <div class="post">
+        <div class="post-content" onclick="profileview('${username}')">
+            <strong><h2>${username}:</h2></strong>
+            <span class="timestamp">${timestamp}</span>
+            <p>${message}</p>
+            <div class="image-container" id="imageContainer-${postId}"></div>
+        </div>
+    </div>
+    <div id="reactionwithbutton">
+        <div id="reactionContainer" class="reaction-container" style="display: none;">
+         <button onclick="reactToPost('like')" class="reaction-choice"><i class="fas fa-thumbs-up"></i> <span id="likeCount">0</span></button>
+         <button onclick="reactToPost('love')" class="reaction-choice"><i class="fas fa-heart"></i> <span id="loveCount">0</span></button>
+         <button onclick="reactToPost('laugh')" class="reaction-choice"><i class="fas fa-laugh"></i> <span id="laughCount">0</span></button>
+         <button onclick="reactToPost('surprised')" class="reaction-choice"><i class="fas fa-surprise"></i> <span id="surprisedCount">0</span></button>
+         <button onclick="reactToPost('sad')" class="reaction-choice"><i class="fas fa-sad-tear"></i> <span id="sadCount">0</span></button>
+         <button onclick="reactToPost('angry')" class="reaction-choice"><i class="fas fa-angry"></i> <span id="angryCount">0</span></button>
+         </div>
+         <button id="mainReactionButton" class="reaction-button-open" onclick="reactionsvisiblity()">
+        <i class="fas fa-smile"></i></div>
+          </button>
+</div>
+    </main>
+    <!-- Chat Icon -->
+    <div id="chatIcon" onclick="toggleChatWindow()">
+        <i class="fas fa-comments"></i>
+    </div>
+    <!-- Chat Window -->
+ <div id="chatWindow">
+  <div id="chatHeader" class="hidden">
+  <h3 id="chat" class="hidden">Chat</h3>
+  <br>
+  <button onclick="toggleChatWindow()" class="hidden"><i class="fas fa-times"></i></button>
+        </div>
+  <input type="text" id="messageInput" placeholder="Type your message...">
+  <input type="file" id="fileInput" accept="/*" multiple>
+  <br><br>
+  <button onclick="sendMessage()" id="sendMessagebutton"><i class="fas fa-paper-plane" onclick="sendMessage()"></i><br> <strong>SendMessage</strong></button>
+        <div class="resizer"></div>
+    </div>
+    <!-- Trending Icon -->
+    <div id="trendingIcon">
+        <i class="fas fa-hashtag"></i>
+    </div>
+    <!-- Trending Window -->
+    <div id="trendingWindow">
+        <div id="trendingHeader">
+            <h3>Trending</h3>
+            <i class="fas fa-times"></i></button>
+        </div>
+        <div id="trendingContent">
+            <!-- Trending hashtags will be dynamically inserted here -->
+        </div>
+        <div class="resizer"></div>
+    </div>
+    <div id="alertMessage" style="display: none; color: green;">File uploaded successfully!</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+import { getDatabase, ref as databaseRef, set, onValue, orderByChild, query,onChildAdded } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+import {getStorage,ref as storageRef,uploadBytes, getDownloadURL} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-storage.js"
+ const firebaseConfig = {
+            apiKey: "AIzaSyCYOyIRSUKpEpGwxZfXgpPDxjP-mYouerg",
+            authDomain: "thesocial-cba4b.firebaseapp.com",
+            databaseURL: "https://thesocial-cba4b-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "thesocial-cba4b",
+            storageBucket: "thesocial-cba4b.appspot.com",
+            messagingSenderId: "457960071987",
+            appId: "1:457960071987:web:cf1cb5b332dccf03355446",
+            measurementId: "G-Z1N1WD6HN2"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const storage=getStorage(app)
+        // Retrieve username from URL parameters
+        const params = new URLSearchParams(window.location.search);
+        var username = params.get('username') || 'Guest';
+        console.log(`Logged in as: `+username);
+        var messageInput = document.getElementById('messageInput');
+        const Storageref=storageRef(storage)
+        const fileInput = document.getElementById('fileInput');
+        let fileUrls = [];
+window.sendMessage = function() {
+    const files = fileInput.files;  // All selected files
+    var timeStamp = new Date();
+    var time = timeStamp.getHours() + ":" + timeStamp.getMinutes() + ":" + timeStamp.getSeconds();
+    var message = messageInput.value.trim();
+
+    if (message !== "" && files.length > 0) {
+        console.log(username, timeStamp, time, message, files);
+
+        // Array to store file URLs after uploading
+        const fileUrls = [];
+
+        // Loop through each file and upload
+        const uploadPromises = Array.from(files).map((file) => {
+            const storageRefPath = storageRef(storage, 'uploads/' + file.name);
+            
+            // Upload the file
+            return uploadBytes(storageRefPath, file).then((snapshot) => {
+                return getDownloadURL(snapshot.ref);
+            }).then((downloadURL) => {
+                // Push the URL into the fileUrls array
+                fileUrls.push({
+                    fileName: file.name,
+                    url: downloadURL
+                });
+            });
+        });
+
+        // After all files are uploaded, store the message and URLs in the Realtime Database
+        Promise.all(uploadPromises).then(() => {
+            // Save message to 'messages'
+            set(databaseRef(db, `messages/`+time), {
+                username: username,
+                message: message,
+                Timestamp: time,
+                files: fileUrls // Store file URLs in the 'files' field
+            });
+
+            // Save to 'MyPosts' under the username
+            set(databaseRef(db, `MyPosts/${username}`+time), {
+                username: username,
+                message: message,
+                Timestamp: time,
+                files: fileUrls // Store file URLs in the 'files' field
+            });
+            
+            // Optionally, save each file metadata in 'uploads' (if needed)
+            Promise.all(fileUrls.map((file) => {
+                return set(databaseRef(db, `uploads/`+username+file.fileName), {
+                    fileName: file.fileName,
+                    url: file.url,
+                    uploadedAt: time,
+                    message: message
+                });
+            }))
+            .then(() => {
+                console.log("Message and files successfully saved.");
+                loadMessages();  // Reload the messages after saving
+            })
+            .catch((error) => {
+                console.error("Error during upload or database update:", error);
+            });
+        });
+    }
+    else if (files.length > 0 && message === "") {
+        // If no message, but files exist
+        Array.from(files).forEach((file) => {
+            const storageRefPath = storageRef(storage, 'uploads/' + file.name);
+
+            uploadBytes(storageRefPath, file).then((snapshot) => {
+                return getDownloadURL(snapshot.ref);
+            }).then((downloadURL) => {
+                return set(databaseRef(db, `uploads/`+username+file.name), {
+                    fileName: file.name,
+                    url: downloadURL,
+                    uploadedAt: time
+                });
+            }).then(() => {
+                console.log(`File ${file.name} metadata saved to database`);
+                loadMessages();  // Reload the messages after saving
+            }).catch((error) => {
+                console.error('Error during upload or database update:', error);
+            });
+        });
+    }
+    else if (message !== "") {
+        // If there's no file, but there's a message
+        set(databaseRef(db, `messages/`+time), {
+            username: username,
+            message: message,
+            Timestamp: time
+        }).catch((error) => {
+            console.error('Error saving message:', error);
+        });
+    }
+    fileInput.value = "";
+    messageInput.value = "";
+};
+window.loadMessages = function() {
+    const messagesRef = query(databaseRef(db, 'messages'));
+    onValue(messagesRef, (snapshot) => {
+        const feed = document.getElementById('feed');
+        feed.innerHTML = ''; // Clear previous posts
+        snapshot.forEach(childSnapshot => {
+            const msg = childSnapshot.val();
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('post');
+            const cusername = sanitizeHTML(msg.username || 'Anonymous');
+            const message = sanitizeHTML(msg.message || '[No message]');
+            const timestamp = msg.Timestamp; 
+            const files = Array.isArray(msg.files) ? msg.files : [];
+            messageElement.innerHTML = `
+                <div class="post-content" onclick="profileview('${cusername}')">
+                    <strong><h2>${cusername}:</h2></strong>
+                    <span class="timestamp">${timestamp}</span>
+                    <p>${message}</p>
+                    <a href="${files.url}">
+                    <div class="post-images" id="imageContainer-${childSnapshot.key}"></div></a>
+                </div>
+                <div id="reactionwithbutton">
+                    <div id="reactionContainer" class="reaction-container" style="display: none;">
+                        <button onclick="reactToPost('like', '${childSnapshot.key}')" class="reaction-choice">
+                            <i class="fas fa-thumbs-up"></i> <span id="likeCount-${childSnapshot.key}">0</span>
+                        </button>
+                        <button onclick="reactToPost('love', '${childSnapshot.key}')" class="reaction-choice">
+                            <i class="fas fa-heart"></i> <span id="loveCount-${childSnapshot.key}">0</span>
+                        </button>
+                        <button onclick="reactToPost('laugh', '${childSnapshot.key}')" class="reaction-choice">
+                            <i class="fas fa-laugh"></i> <span id="laughCount-${childSnapshot.key}">0</span>
+                        </button>
+                        <button onclick="reactToPost('surprised', '${childSnapshot.key}')" class="reaction-choice">
+                            <i class="fas fa-surprise"></i> <span id="surprisedCount-${childSnapshot.key}">0</span>
+                        </button>
+                        <button onclick="reactToPost('sad', '${childSnapshot.key}')" class="reaction-choice">
+                            <i class="fas fa-sad-tear"></i> <span id="sadCount-${childSnapshot.key}">0</span>
+                        </button>
+                        <button onclick="reactToPost('angry', '${childSnapshot.key}')" class="reaction-choice">
+                            <i class="fas fa-angry"></i> <span id="angryCount-${childSnapshot.key}">0</span>
+                        </button>
+                    </div>
+                    <button id="mainReactionButton" class="reaction-button-open" onclick="reactionsVisibility('${childSnapshot.key}')">
+                        <i class="fas fa-smile"></i>
+                    </button>
+                </div>
+            `;
+            feed.appendChild(messageElement);
+            displayImages(files, `imageContainer-${childSnapshot.key}`);
+        });
+    }, error => {
+        console.error("Error fetching messages: ", error);
+    });
+};
+window.profileview = function(cusername) {
+    console.log(cusername);
+    window.location.href = "profile.html?ViewUsername=" + cusername+"  & username="+username;
+}
+window.sanitizeHTML=function(str) {
+    const temp = document.createElement('div');
+    temp.textContent = str;
+    return temp.innerHTML;
+}
+window.enableDarkMode=function() {
+    const body = document.body;
+    const modeButton = document.getElementById('mode');
+    const icon = modeButton.querySelector('i');
+
+    body.classList.add('dark-mode');
+    document.querySelector('header').classList.add('dark-mode');
+    document.querySelector('nav').classList.add('dark-mode');
+    document.querySelector('main').classList.add('dark-mode');
+
+    icon.classList.add('fa-sun');
+    icon.classList.remove('fa-moon');
+}
+window.disableDarkMode=function() {
+    const body = document.body;
+    const modeButton = document.getElementById('mode');
+    const icon = modeButton.querySelector('i');
+
+    body.classList.remove('dark-mode');
+    document.querySelector('header').classList.remove('dark-mode');
+    document.querySelector('nav').classList.remove('dark-mode');
+    document.querySelector('main').classList.remove('dark-mode');
+
+    icon.classList.add('fa-moon');
+    icon.classList.remove('fa-sun');
+}
+window.darkmode=function() {
+    const body = document.body;
+    const isDarkMode = body.classList.toggle('dark-mode');
+    const modeButton = document.getElementById('mode');
+    const icon = modeButton.querySelector('i');
+
+    if (isDarkMode) {
+        icon.classList.add('fa-sun');
+        icon.classList.remove('fa-moon');
+    } else {
+        icon.classList.add('fa-moon');
+        icon.classList.remove('fa-sun');
+    }
+
+    // Save the theme preference to Firebase
+    set(databaseRef(db, 'ModePreference/' + username), { theme: isDarkMode ? 'dark' : 'light' });
+}
+window.applySavedTheme=function() {
+    const modeRef = databaseRef(db, 'ModePreference/' + username);
+
+    // Fetch the theme preference from Firebase
+    onValue(modeRef, (snapshot) => {
+        const data = snapshot.val();
+        const savedTheme = data ? data.theme : 'light'; // Default to 'light' if no preference saved
+        
+        if (savedTheme === 'dark') {
+            enableDarkMode();
+        } else {
+            disableDarkMode();
+        }
+    });
+}
+const modeRef = databaseRef(db, 'ModePreference/' + username);
+document.addEventListener('DOMContentLoaded', () => {
+    loadMessages();
+    applySavedTheme();
+    });
+window.OnContentLoaded=function(){
+  loadMessages();
+  applySavedTheme();
+    }
+window.reactToPost=function(reaction, postId) {
+    console.log(`User reacted with: ${reaction} on post: ${postId}`);
+    
+    // Get the current count for the selected reaction for the specific post
+    const countElement = document.getElementById(`${reaction}Count-${postId}`);
+    let currentCount = parseInt(countElement.innerText);
+    
+    // Increment the reaction count
+    currentCount += 1;
+    
+    // Update the UI with the new count
+    countElement.innerText = currentCount;
+
+    // Save the updated reaction count to Firebase for this specific post
+    const reactionRef = databaseRef(db, `reactions/${postId}/${reaction}`);
+    set(reactionRef, currentCount);
+}
+window.reactionsVisibility=function(postId) {
+    const reactionVisibility = document.getElementById(`reactionContainer-${postId}`);
+    if (reactionVisibility.style.display === 'none' || reactionVisibility.style.display === '') {
+        reactionVisibility.style.display = 'block'; // Show the reaction menu for the current post
+    } else {
+        reactionVisibility.style.display = 'none'; // Hide the reaction menu for the current post
+    }
+}
+function displayImages(files, containerId) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = ''; // Clear any existing content
+    // Limit display to 4 images and add "+N more" overlay for extra images
+    files.slice(0, 4).forEach((file) => {
+
+        const img = document.createElement("img");
+        img.src = file.url;
+        img.alt = "Post image";
+        img.classList.add("post-image");
+        container.appendChild(img);
+    });
+
+    // If there are more than 4 images, add an overlay for the extra images
+    if (files.length > 4) {
+        const moreOverlay = document.createElement("div");
+        moreOverlay.classList.add("more-overlay");
+        moreOverlay.innerText = `+${files.length - 4} more`;
+        container.appendChild(moreOverlay);
+    }
+}
+window.loadReactions=function(postId) {
+    const reactions = ['like', 'love', 'laugh', 'surprised', 'sad', 'angry'];
+    reactions.forEach(reaction => {
+        const reactionRef = databaseRef(db, `reactions/${postId}/${reaction}`);
+        
+        // Retrieve the current count for each reaction from Firebase for the specific post
+        onValue(reactionRef, (snapshot) => {
+            const count = snapshot.val() || 0;
+            document.getElementById(`${reaction}Count-${postId}`).innerText = count;
+        });
+    });
+}
+window.toggleChatWindow=function() {
+    const chatWindow = document.getElementById('chatWindow');
+    if (chatWindow.style.display === 'none' || chatWindow.style.display === '') {
+        chatWindow.style.display = 'block'; // Show the navbar
+    } else {
+        chatWindow.style.display = 'none'; // Hide the navbar
+    }
+}
+window.toggleTrendingWindow=function() {
+    const trendingWindow = document.getElementById('trendingWindow');
+    if (trendingWindow.style.display === 'none' || trendingWindow.style.display === '') {
+        trendingWindow.style.display = 'block'; // Show the navbar
+    } else {
+        trendingWindow.style.display = 'none'; // Hide the navbar
+    }
+}
+window.makeResizable=function(element) {
+    const resizer = document.createElement('div');
+    resizer.className = 'resizer';
+    element.appendChild(resizer);
+
+    resizer.addEventListener('mousedown', initResize);
+
+window.initResize=function(e) {
+        window.addEventListener('mousemove', resizeElement);
+        window.addEventListener('mouseup', stopResize);
+    }
+
+window.resizeElement=function(e) {
+        element.style.width = (e.clientX - element.getBoundingClientRect().left) + 'px';
+        element.style.height = (e.clientY - element.getBoundingClientRect().top) + 'px';
+    }
+window.stopResize=function() {
+        window.removeEventListener('mousemove', resizeElement);
+        window.removeEventListener('mouseup', stopResize);
+    }
+    
+    }
+</script>
+</body>
+</html>

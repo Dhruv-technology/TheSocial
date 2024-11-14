@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - WhatsApp Replica</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="firebase.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Chat with <span id="friendName"></span></h1>
+    </header>
+
+    <main>
+        <section id="chatSection">
+            <div id="chatMessages"></div>
+            <input type="text" id="messageInput" placeholder="Type a message...">
+            <button onclick="sendMessage()">Send</button>
+            <button onclick="sendEmoji()">😀</button>
+            <button onclick="sendVoiceMessage()">🎤</button>
+            <button onclick="phone()">📞</button>
+        </section>
+    </main>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYOyIRSUKpEpGwxZfXgpPDxjP-mYouerg",
+            authDomain: "thesocial-cba4b.firebaseapp.com",
+            databaseURL: "https://thesocial-cba4b-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "thesocial-cba4b",
+            storageBucket: "thesocial-cba4b.appspot.com",
+            messagingSenderId: "457960071987",
+            appId: "1:457960071987:web:cf1cb5b332dccf03355446",
+            measurementId: "G-Z1N1WD6HN2"
+        };
+        const urlParams = new URLSearchParams(window.location.search);
+        const friendUsername = urlParams.get('friend');
+        const username = 'user1'; // Hardcoded username for now
+
+        document.getElementById('friendName').textContent = friendUsername;
+
+        const chatMessagesElement = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+
+        // Load chat messages from Firebase
+        function loadChatMessages() {
+            const chatRef = firebase.database().ref(`Messages/${username}/${friendUsername}`);
+            chatRef.on('value', snapshot => {
+                chatMessagesElement.innerHTML = '';
+                snapshot.forEach(childSnapshot => {
+                    const msg = childSnapshot.val();
+                    const messageElement = document.createElement('div');
+                    messageElement.textContent = `${msg.sender}: ${msg.message}`;
+                    chatMessagesElement.appendChild(messageElement);
+                });
+                chatMessagesElement.scrollTop = chatMessagesElement.scrollHeight;
+            });
+        }
+
+        loadChatMessages(); // Load messages
+
+        // Send text message
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message) {
+                const timestamp = new Date().toISOString();
+                firebase.database().ref(`Messages/${username}/${friendUsername}/${timestamp}`).set({
+                    sender: username,
+                    message: message
+                });
+                messageInput.value = ''; // Clear input
+            }
+        }
+
+        // Send emoji
+        function sendEmoji() {
+            const emoji = '😀';
+            const timestamp = new Date().toISOString();
+            firebase.database().ref(`Messages/${username}/${friendUsername}/${timestamp}`).set({
+                sender: username,
+                message: emoji
+            });
+        }
+
+        // Send voice message (placeholder for now)
+        function sendVoiceMessage() {
+            const voiceMessage = 'Voice Message Placeholder';
+            const timestamp = new Date().toISOString();
+            firebase.database().ref(`PrivateMessages/${username}/${friendUsername}/${timestamp}`).set({
+                sender: username,
+                message: voiceMessage
+            });
+        }
+window.phone=function(){
+    window.location.href="videocall.html?username="+username+"&friend="+friendUsername;
+}
+    </script>
+</body>
+</html>

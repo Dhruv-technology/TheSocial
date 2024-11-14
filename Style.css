@@ -1,0 +1,466 @@
+/* Global styles */
+body {
+    font-family: Arial, sans-serif,consolas,Times New Roman, Times, serif,consolos;
+    background-color: white;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header styles */
+header {
+    background-color: #007bff;
+    color: white;
+    padding: 20px;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+/* Navbar styles */
+/* Navbar styles */
+nav ul {
+    list-style-type: none;
+    display: flex;
+    justify-content: space-around;
+    padding: 0;
+    margin: 10px 0;
+}
+
+nav ul li {
+    display: inline;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+/* Chat Icon */
+#chatIcon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#chatIcon:hover {
+    background-color: #0056b3;
+}
+
+/* Trending Icon */
+#trendingIcon {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#trendingIcon:hover {
+    background-color: #0056b3;
+}
+
+/* Reaction Buttons */
+.reaction-choice {
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    margin: 5px;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.reaction-choice:hover {
+    transform: scale(1.2);
+    background-color: #f0f0f0;
+}
+
+.reaction-container {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+}
+
+main {
+    padding: 20px;
+}
+#feed{
+    border-radius: 15px;
+    border-color: black;
+    background-color: white;
+    height: 1000px
+}
+/* Post styles */
+.post {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);box-sizing: border-box;
+    color: black;
+    box-sizing: border-box; /* Ensures padding does not add to the width */
+}
+#feed.dark-mode{
+    background-color: black;
+    outline: none;
+    border: none;
+}
+body.dark-mode .post {
+    background-color: black; /* Dark background for posts */
+    color: #ffffff; /* Light text for posts */
+    border: 1px solid #444; /* Border with a darker shade */
+    margin-bottom: 20px; /* Control spacing between posts */
+    padding: 20px; /* Ensure proper padding inside posts */
+    box-sizing: border-box; /* Ensures padding does not add to the width */
+}
+.postreactions.dark-mode{
+    background-color: black;
+}
+/* Reaction button styles */
+#reaction-Container {
+    display: none;
+    position: relative;
+    display: inline-block;
+}
+.main-reaction-button.dark-mode{
+    background-color: black;
+    color: white;
+}
+body.dark-mode #messageInput {
+    background-color: black;
+    color: white;
+    border: 1px solid #444;
+}
+.main-reaction-button {
+    font-size: 24px;
+    background: white;
+    border: none;
+    cursor: pointer;
+    position: relative;
+}
+
+.reaction-choices {
+    display: none;
+    position: absolute;
+    bottom: 100%; /* Position above the main button */
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    white-space: nowrap;
+}
+
+.reaction-choice {
+  
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    margin: 5px;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.reaction-choice:hover {
+    transform: scale(1.2);
+    background-color: #f0f0f0;
+}
+
+.reaction-choice:focus {
+    outline: none;
+}
+
+/* Chat Icon and Chat Window */
+#chatIcon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#chatIcon:hover {
+    background-color: #0056b3;
+}
+
+#chatWindow {
+    display: none;
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 300px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#chatHeader {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#chatMessages {
+    padding: 10px;
+    height: 200px;
+    overflow-y: auto;
+}
+
+#messageInput {
+    width: calc(100% - 50px);
+    height: 300px;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+#chatWindow button {
+    width: 100px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+#chatWindow button:hover {
+    background-color: #0056b3;
+}
+
+/* Trending Icon and Trending Window */
+#trendingIcon {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#trendingIcon:hover {
+    background-color: #0056b3;
+}
+
+#trendingWindow {
+    display: none;
+    position: fixed;
+    bottom: 80px;
+    left: 20px;
+    width: 300px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#trendingHeader {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#trendingContent {
+    padding: 10px;
+    height: 200px;
+    overflow-y: auto;
+}
+
+/* Resizable Handle */
+.resizer {
+    width: 10px;
+    height: 10px;
+    background-color: #007bff;
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    cursor: se-resize;
+    z-index: 1001;
+}
+
+/* Footer styles */
+
+#toggleNavbar{
+    background-color: transparent;
+    font-size: 50px;
+    color: black;
+    border: none;
+}
+#mode{
+    background-color: #007bff;
+    font-size: 50px;
+    color: black;
+    border: none;
+}
+/* General Dark Mode */
+
+/* Ensure header, nav, and main follow dark mode */
+header.dark-mode, nav.dark-mode, main.dark-mode {
+    background-color:black;
+    color: #ffffff;
+    transition: background-color 0.5s, color 0.5s;
+}
+
+
+/* Update icon colors in dark mode */
+.dark-mode i {
+    background-color:transparent;
+    color: #ffffff;
+    border: none;
+}
+/* Toggle sun icon for dark mode */
+.dark-mode #mode i.fa-moon-o {
+    display: none;
+    border: none;
+}
+
+.dark-mode #mode i.fa-sun-o {
+    display: inline;
+    background-color: transparent;
+    border: none;
+}
+body.dark-mode{
+    background-color: black;
+}
+/* Default to moon icon when in light mode */
+#mode i.fa-sun-o {
+    display: none;
+}
+#mode.dark-mode{
+    border: none;
+    background-color: black;
+}
+#toggleNavbar.dark-mode{
+    border: none;
+    outline: none;
+    background-color:transparent;
+}
+/* Set max height for images */
+.post-images img {
+    max-height: 700px; /* Limit image height */
+    object-fit: cover; /* Crop image to fit */
+    margin: 5px;
+    border-radius: 8px;
+}
+
+/* Grid layout for up to 4 images */
+.post-images {
+    display: grid;
+    gap: 5px;
+    position: relative;
+}
+
+.post-images.grid-1 {
+    grid-template-columns: 1fr;
+}
+
+.post-images.grid-2 {
+    grid-template-columns: 1fr 1fr;
+}
+
+.post-images.grid-3, .post-images.grid-4 {
+    grid-template-columns: 1fr 1fr;
+}
+
+/* Overlay for additional images */
+.more-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    font-size: 1.2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    z-index: 1;
+}
+
+
+
+/* Ensure posts have the same style in light mode */
+#b{
+    width: 100%;
+    height: 50px;
+}
+
+/* Optional: Ensure no extra spacing on the last message */
+.post:last-child {
+    margin-bottom: 0; /* Remove margin from the last post */
+}
+
+/* Target all interactive elements */
+i, a, .fa {
+    outline: none !important;          /* Completely remove outline */
+    box-shadow: none !important;       /* Remove any box shadow */
+    border: none !important;           /* Ensure no border styles */
+    background-color: transparent !important; /* Ensure no unwanted background */
+}
+.reaction-choice {
+    display: flex;
+    align-items: center;
+}
+
+.reaction-choice span {
+    margin-left: 5px;
+    font-size: 16px;
+}
+#profileview{
+    background-color:transparent;
+    color: #ffffff;
+    outline: none;
+}

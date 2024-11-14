@@ -1,0 +1,146 @@
+<html> 
+    <head>
+        <style type="stylesheet" href="Style.css"></style>
+    </head>
+    <body onload="loadMessages()">
+        <h1 id="Bravia"></h1>
+        <button onclick="addfriend()" id="addfriend">ADD Friends</button>
+        <div id="feed" class="page">
+            <div class="post">
+                    <strong><h2>username</h2></strong>
+                    <span class="timestamp">timestamp</span>
+                    <p>message</p>
+                    <div class="image-container" id="imageContainer-${postId}"></div>
+            </div>
+            <div id="reactionwithbutton">
+                <div id="reactionContainer" class="reaction-container" style="display: none;">
+                 <button onclick="reactToPost('like')" class="reaction-choice"><i class="fas fa-thumbs-up"></i> <span id="likeCount">0</span></button>
+                 <button onclick="reactToPost('love')" class="reaction-choice"><i class="fas fa-heart"></i> <span id="loveCount">0</span></button>
+                 <button onclick="reactToPost('laugh')" class="reaction-choice"><i class="fas fa-laugh"></i> <span id="laughCount">0</span></button>
+                 <button onclick="reactToPost('surprised')" class="reaction-choice"><i class="fas fa-surprise"></i> <span id="surprisedCount">0</span></button>
+                 <button onclick="reactToPost('sad')" class="reaction-choice"><i class="fas fa-sad-tear"></i> <span id="sadCount">0</span></button>
+                 <button onclick="reactToPost('angry')" class="reaction-choice"><i class="fas fa-angry"></i> <span id="angryCount">0</span></button>
+                 </div>
+                 <button id="mainReactionButton" class="reaction-button-open" onclick="reactionsvisiblity()">
+                <i class="fas fa-smile"></i></div>
+                  </button>
+        </div>
+        <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+import { getDatabase, ref as databaseRef, set, onValue, orderByChild, query,onChildAdded } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+import {getStorage,ref as storageRef,uploadBytes, getDownloadURL} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-storage.js"
+ const firebaseConfig = {
+            apiKey: "AIzaSyCYOyIRSUKpEpGwxZfXgpPDxjP-mYouerg",
+            authDomain: "thesocial-cba4b.firebaseapp.com",
+            databaseURL: "https://thesocial-cba4b-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "thesocial-cba4b",
+            storageBucket: "thesocial-cba4b.appspot.com",
+            messagingSenderId: "457960071987",
+            appId: "1:457960071987:web:cf1cb5b332dccf03355446",
+            measurementId: "G-Z1N1WD6HN2"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const storage=getStorage(app)
+        const pseoudoparams = new URLSearchParams(window.location.search);
+        var ViewUsername = pseoudoparams.get('ViewUsername') || 'Guest';
+        console.log(`Looking at: `+ViewUsername);
+        const params = new URLSearchParams(window.location.search);
+        var username = params.get('Username') || 'Guest';
+        console.log(`I am: `+username);
+ window.loadMessages = function() {
+    onValue(query(databaseRef(db, `MyPosts/${ViewUsername}`)), (snapshot) => {
+        const feed = document.getElementById('feed'); // Assuming #feed is your container for posts
+        feed.innerHTML = ''; snapshot.forEach(childSnapshot => {
+            const msg = childSnapshot.val();
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('post');
+            const cusername = sanitizeHTML(msg.username || 'Anonymous');
+            const message = sanitizeHTML(msg.message || '[No message]');
+            const timestamp = msg.Timestamp; 
+            const files = Array.isArray(msg.files) ? msg.files : [];
+            messageElement.innerHTML = `
+                <div class="post-content" onclick="profileview('${cusername}')">
+                    <strong><h2>${cusername}:</h2></strong>
+                    <span class="timestamp">${timestamp}</span>
+                    <p>${message}</p>
+                    <a href="${files.url}">
+                    <div class="post-images" id="imageContainer-${childSnapshot.key}"></div></a>
+                </div>
+                <div id="reactionwithbutton">
+                    <div id="reactionContainer" class="reaction-container" style="display: none;">
+                        <button onclick="reactToPost('like', '${childSnapshot.key}')" class="reaction-choice">
+                            <i class="fas fa-thumbs-up"></i> <span id="likeCount-${childSnapshot.key}">0</span>
+                        </button>
+                        <button onclick="reactToPost('love', '${childSnapshot.key}')" class="reaction-choice">
+                            <i class="fas fa-heart"></i> <span id="loveCount-${childSnapshot.key}">0</span>
+                        </button>
+                        <button onclick="reactToPost('laugh', '${childSnapshot.key}')" class="reaction-choice">
+                            <i class="fas fa-laugh"></i> <span id="laughCount-${childSnapshot.key}">0</span>
+                        </button>
+                        <button onclick="reactToPost('surprised', '${childSnapshot.key}')" class="reaction-choice">
+                            <i class="fas fa-surprise"></i> <span id="surprisedCount-${childSnapshot.key}">0</span>
+                        </button>
+                        <button onclick="reactToPost('sad', '${childSnapshot.key}')" class="reaction-choice">
+                            <i class="fas fa-sad-tear"></i> <span id="sadCount-${childSnapshot.key}">0</span>
+                        </button>
+                        <button onclick="reactToPost('angry', '${childSnapshot.key}')" class="reaction-choice">
+                            <i class="fas fa-angry"></i> <span id="angryCount-${childSnapshot.key}">0</span>
+                        </button>
+                    </div>
+                    <button id="mainReactionButton" class="reaction-button-open" onclick="reactionsVisibility('${childSnapshot.key}')">
+                        <i class="fas fa-smile"></i>
+                    </button>
+                </div>
+            `;
+            feed.appendChild(messageElement);
+            displayImages(files, `imageContainer-${childSnapshot.key}`);
+        });
+        feed.scrollTop = feed.scrollHeight; // Auto-scroll to the latest message
+    }, error => {
+        console.error("Error fetching messages: ", error);
+    });
+};
+window.displayImages=function(files, containerId) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = ''; // Clear any existing content
+    // Limit display to 4 images and add "+N more" overlay for extra images
+    files.slice(0, 4).forEach((file) => {
+
+        const img = document.createElement("img");
+        img.src = file.url;
+        img.alt = "Post image";
+        img.classList.add("post-image");
+        container.appendChild(img);
+    });
+
+    // If there are more than 4 images, add an overlay for the extra images
+    if (files.length > 4) {
+        const moreOverlay = document.createElement("div");
+        moreOverlay.classList.add("more-overlay");
+        moreOverlay.innerText = `+${files.length - 4} more`;
+        container.appendChild(moreOverlay);
+    }
+}
+window.sanitizeHTML = function(str) {
+    const temp = document.createElement('div');
+    temp.textContent = str;
+    return temp.innerHTML;
+};
+window.addfriend = function() {
+    console.log("addfriend function called with username:", username, "and ViewUsername:", ViewUsername);
+
+    set(databaseRef(db, `Friends/${username}/${ViewUsername}`), {
+        username: ViewUsername
+    })
+    .then(() => {
+        console.log(`Friend added successfully to Friends/${username}/${ViewUsername}`);
+    window.location.href = "friendsMenu.html?username="+username;
+    })
+    .catch((error) => {
+        console.error('Error saving friend:', error);
+    });
+};
+        </script>
+    </body>
+    </html>

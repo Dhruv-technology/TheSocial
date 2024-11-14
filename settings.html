@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Social Media Super App</title>
+    <link rel="stylesheet" href="Style.css">
+    <script src="Data.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1>Settings</h1>
+        <nav>
+            <ul>
+                <li><a href="data.html#home"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="data.html#feed"><i class="fas fa-stream"></i> Feed</a></li>
+                <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
+                <li><a href="data.html#messages"><i class="fas fa-envelope"></i> Messages</a></li>
+                <li><a href="data.html#notifications"><i class="fas fa-bell"></i> Notifications</a></li>
+                <li><a href="settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+                <li><a href="data.html#logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section id="settings" class="page">
+            <h2>Settings</h2>
+            <form id="settingsForm">
+                <label for="profilePicture">Profile Picture</label>
+                <input type="file" id="profilePictureInput" name="profilePicture">
+                
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" value="Current Username">
+                
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="user@example.com">
+                
+                <label for="password">New Password</label>
+                <input type="password" id="password" name="password">
+                
+                <button type="submit">Save Changes</button>
+            </form>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 Social Media Super App</p>
+    </footer>
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Settings</title>
+    <link rel="stylesheet" href="Profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script defer src="Profile.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Profile Settings</h1>
+        <nav id="navbar">
+            <ul>
+               <li><a href="Data.html"><i class="fas fa-home"></i> Home</a></li>
+               <li><a href="profile.html"><i class="fas fa-user"></i> Settings</a></li>
+               <li><a href="friends.html"><i class="fas fa-users"></i> Friends</a></li>
+               <li><a href="events_notifications.html"><i class="fas fa-bell"></i> Notifications</a></li>
+               <li><a href="events_notifications.html"><i class="fas fa-calendar-alt"></i> Events</a></li>
+               <li><a href="jobs.html"><i class="fas fa-briefcase"></i> Jobs</a></li>
+            </ul>
+          </nav>
+    </header>
+    <main>
+        <!-- Profile Section -->
+        <section id="profile" class="page">
+            <h2>Profile Section</h2>
+            <div id="profileInfo">
+                <h3>User Name</h3>
+                <p>Email: user@example.com</p>
+                <p>Joined: January 1, 2024</p>
+            </div>
+            <div id="userActivity">
+                <h3>Activity</h3>
+                <ul>
+                    <li>Posts: 10</li>
+                    <li>Friends: 20</li>
+                    <li>Likes: 100</li>
+                </ul>
+            </div>
+            <div class="profile-container">
+                <h1>User Profile</h1>
+                <input type="file" id="profilePictureInput" accept="image/*">
+                <button onclick="uploadProfilePic()"><i class="fas fa-upload"></i> Upload Profile Picture</button>
+                <img id="profilePic" src="#" alt="Profile Picture">
+            </div>
+        </section>
+        
+        <!-- Settings Section -->
+        <section id="settings" class="page">
+            <h2>Settings Section</h2>
+            <form id="settingsForm">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+                <button type="submit"><i class="fas fa-save"></i> Save Changes</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
+function uploadProfilePic() {
+    const fileInput = document.getElementById('profilePictureInput');
+    const file = fileInput.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const profilePic = document.getElementById('profilePic');
+            profilePic.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+}function uploadProfilePic() {
+    const fileInput = document.getElementById('profilePictureInput');
+    const file = fileInput.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const profilePic = document.getElementById('profilePic');
+            profilePic.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social - Friends</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body onload="loadFriends()">
+    <header>
+        <h1>Friends</h1>
+        <nav>
+            <ul>
+                <li><a href="data.html"><i class="fas fa-arrow-left"></i> Back</a></li>
+                <li><a href="friends.html"><i class="fas fa-users"></i> Friends</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <section id="friends" class="page">
+            <h2>Friends Section</h2>
+            <div id="friendList">
+                <!-- Friends list will be loaded here -->
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+        import { getDatabase, ref as databaseRef, set, onValue, query } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+        import { auth, provider, db, ref, query, onValue, signInWithPopup } from './firebase.js';
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYOyIRSUKpEpGwxZfXgpPDxjP-mYouerg",
+            authDomain: "thesocial-cba4b.firebaseapp.com",
+            databaseURL: "https://thesocial-cba4b-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "thesocial-cba4b",
+            storageBucket: "thesocial-cba4b.appspot.com",
+            messagingSenderId: "457960071987",
+            appId: "1:457960071987:web:cf1cb5b332dccf03355446",
+            measurementId: "G-Z1N1WD6HN2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Retrieve username from URL parameters
+        const params = new URLSearchParams(window.location.search);
+        const username = params.get('username') || 'Guest';
+        console.log(`Logged in as: ${username}`);
+
+        // Load friends list from Firebase
+        window.loadFriends=function() {
+            const friendsRef = query(databaseRef(db, `Friends/${username}`));
+            const friendList = document.getElementById('friendList');
+            friendList.innerHTML = ''; // Clear previous friend entries
+            console.log("Called")
+            onValue(friendsRef, (snapshot) => {
+                snapshot.forEach((childSnapshot) => {
+                    const friendUsername = childSnapshot.key; // Get friend's username
+                    const friendElement = document.createElement('div');
+                    friendElement.classList.add('friend');
+                    friendElement.innerHTML = `
+                        <h3>${friendUsername}</h3>
+                        <button onclick="openChat('${friendUsername}')"><i class="fas fa-comment"></i> Chat</button>
+                    `;
+                    friendList.appendChild(friendElement);
+                });
+            });
+        }
+
+        // Function to open chat with a friend
+        window.openChat=function(friendUsername) {
+            window.location.href="Friends.html?username="+username+"& friend="+friendUsername;
+        }
+        // Load friends on page load
+        document.addEventListener('DOMContentLoaded', loadFriends);
+    </script>
+    <style>/* Basic styling */
+        body {
+            background-color: #121212; /* Dark background */
+            color: #e0e0e0; /* Light text */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        header {
+            background-color: #1f1f1f;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        header h1 {
+            color: #f5f5f5;
+            font-size: 2rem;
+        }
+        
+        nav ul {
+            list-style: none;
+            padding: 0;
+            text-align: center;
+        }
+        
+        nav ul li {
+            display: inline-block;
+            margin: 0 15px;
+        }
+        
+        nav ul li a {
+            color: #f5f5f5;
+            text-decoration: none;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        nav ul li a i {
+            margin-right: 8px;
+        }
+        
+        /* Main content */
+        main {
+            padding: 20px;
+        }
+        
+        #friends {
+            background-color: #1d1d1d;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        h2 {
+            color: #e0e0e0;
+            font-size: 1.5rem;
+        }
+        
+        #friendList {
+            margin-top: 20px;
+        }
+        
+        .friend {
+            background-color: #2c2c2c;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            color: #f5f5f5;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .friend h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        
+        .friend p {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+        }
+        
+        button {
+            background-color: #444444;
+            color: #f5f5f5;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: #666666;
+        }
+        
+        button:focus {
+            outline: none;
+        }
+        
+        button i {
+            margin-right: 8px;
+        }
+        </style>
+</body>
+</html>
