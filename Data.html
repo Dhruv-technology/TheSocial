@@ -40,7 +40,7 @@
     <div class="post">
         <div class="post-content" onclick="profileview('${username}')">
             <strong><h2>${username}:</h2></strong>
-            <span class="timestamp">${timestamp}</span>
+            <span class="timestamp">${time}</span>
             <p>${message}</p>
             <div class="image-container" id="imageContainer-${postId}"></div>
         </div>
@@ -118,23 +118,18 @@ import {getStorage,ref as storageRef,uploadBytes, getDownloadURL} from "https://
         const Storageref=storageRef(storage)
         const fileInput = document.getElementById('fileInput');
         let fileUrls = [];
+        const now = new Date();
+const time = now.toLocaleString().replace(/\//g, "-");
+console.log(time);
 window.sendMessage = function() {
     const files = fileInput.files;  // All selected files
-    var timeStamp = new Date();
-    var time = timeStamp.getHours() + ":" + timeStamp.getMinutes() + ":" + timeStamp.getSeconds();
     var message = messageInput.value.trim();
 
     if (message !== "" && files.length > 0) {
-        console.log(username, timeStamp, time, message, files);
-
-        // Array to store file URLs after uploading
+        console.log(username, time, message, files);
         const fileUrls = [];
-
-        // Loop through each file and upload
         const uploadPromises = Array.from(files).map((file) => {
             const storageRefPath = storageRef(storage, 'uploads/' + file.name);
-            
-            // Upload the file
             return uploadBytes(storageRefPath, file).then((snapshot) => {
                 return getDownloadURL(snapshot.ref);
             }).then((downloadURL) => {
@@ -205,11 +200,19 @@ window.sendMessage = function() {
     }
     else if (message !== "") {
         // If there's no file, but there's a message
-        set(databaseRef(db, `messages/`+time), {
+        set(databaseRef(db, `messages/${time}`), {
             username: username,
             message: message,
             Timestamp: time
-        }).catch((error) => {
+        }).then(() => {
+            set(databaseRef(db, `MyPosts/${username}/${time}`), {
+                username: username,
+                message: message,
+                Timestamp: time,
+                files: fileUrls // Store file URLs in the 'files' field
+            });
+            })
+            .catch((error) => {
             console.error('Error saving message:', error);
         });
     }

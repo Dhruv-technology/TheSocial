@@ -28,10 +28,10 @@
     </main>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-        import { getDatabase, ref as databaseRef, set, onValue, query } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
-        import { auth, provider, db, ref, query, onValue, signInWithPopup } from './firebase.js';
-        const firebaseConfig = {
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+import { getDatabase, ref as databaseRef, set, onValue, orderByChild, query,onChildAdded } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+import {getStorage,ref as storageRef,uploadBytes, getDownloadURL} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-storage.js"
+ const firebaseConfig = {
             apiKey: "AIzaSyCYOyIRSUKpEpGwxZfXgpPDxjP-mYouerg",
             authDomain: "thesocial-cba4b.firebaseapp.com",
             databaseURL: "https://thesocial-cba4b-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -41,15 +41,11 @@
             appId: "1:457960071987:web:cf1cb5b332dccf03355446",
             measurementId: "G-Z1N1WD6HN2"
         };
-
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-
-        // Retrieve username from URL parameters
+        const storage=getStorage(app)
         const params = new URLSearchParams(window.location.search);
-        const username = params.get('username') || 'Guest';
-        console.log(`Logged in as: ${username}`);
-
+        var username = params.get('username') || 'Guest';
         // Load friends list from Firebase
         window.loadFriends=function() {
             const friendsRef = query(databaseRef(db, `Friends/${username}`));
@@ -72,7 +68,8 @@
 
         // Function to open chat with a friend
         window.openChat=function(friendUsername) {
-            window.location.href="Friends.html?username="+username+"& friend="+friendUsername;
+            window.location.href="Friends.html?username="+username+"&friend="+friendUsername;
+            var username="";
         }
         // Load friends on page load
         document.addEventListener('DOMContentLoaded', loadFriends);
